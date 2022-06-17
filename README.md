@@ -1,6 +1,6 @@
 # study-react-native-todos
 
-# 환경 구성
+## 환경 구성
 
 expo를 사용하여 구현 확인
 

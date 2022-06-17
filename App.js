@@ -14,20 +14,30 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Fontisto } from '@expo/vector-icons'
 
 const STORAGE_KEY = '@todos'
+const IS_WORK = '@isWork'
 
 export default function App() {
   const [working, setWorking] = useState(true)
   const [text, setText] = useState('')
   const [todos, setTodos] = useState({})
 
-  const travel = () => setWorking(false)
-  const work = () => setWorking(true)
+  const travel = () => {
+    setWorking(false)
+    saveIsWork(false)
+  }
+  const work = () => {
+    setWorking(true)
+    saveIsWork(true)
+  }
   const onChangeText = (payload) => setText(payload)
   const addToDo = async () => {
     if (text === '') {
       return
     }
-    const newTodos = { ...todos, [Date.now()]: { text, work: working } }
+    const newTodos = {
+      ...todos,
+      [Date.now()]: { text, work: working, isComplete: false },
+    }
     // console.log(newTodos)
     setTodos(newTodos)
     await saveTodos(newTodos)
@@ -51,6 +61,23 @@ export default function App() {
     }
   }
 
+  const saveIsWork = async (toSave) => {
+    try {
+      await AsyncStorage.setItem(IS_WORK, JSON.stringify(toSave))
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  const loadIsWork = async () => {
+    try {
+      const str = await AsyncStorage.getItem(IS_WORK)
+      setWorking(JSON.parse(str))
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   const deleteTodo = (key) => {
     Alert.alert('Delete To Do?', 'Are you sure?', [
       { text: '아니오' },
@@ -67,8 +94,16 @@ export default function App() {
     ])
   }
 
+  const toggleCompleteTodos = (key) => {
+    const newTodos = { ...todos }
+    newTodos[key].isComplete = !newTodos[key].isComplete
+    setTodos(newTodos)
+    saveTodos(newTodos)
+  }
+
   useEffect(() => {
     loadTodos()
+    loadIsWork()
   }, [])
 
   return (
@@ -112,7 +147,23 @@ export default function App() {
         {Object.keys(todos).map((key) =>
           todos[key].work === working ? (
             <View style={styles.todo} key={key}>
-              <Text style={styles.todoText}>{todos[key].text}</Text>
+              <TouchableOpacity onPress={() => toggleCompleteTodos(key)}>
+                <Fontisto
+                  name={`checkbox-${
+                    todos[key].isComplete ? 'active' : 'passive'
+                  }`}
+                  size={18}
+                  color='white'
+                />
+              </TouchableOpacity>
+              <Text
+                style={{
+                  ...styles.todoText,
+                  ...(todos[key].isComplete ? styles.completeText : {}),
+                }}
+              >
+                {todos[key].text}
+              </Text>
               <TouchableOpacity onPress={() => deleteTodo(key)}>
                 <Fontisto name='trash' size={18} color={theme.grey} />
               </TouchableOpacity>
@@ -159,4 +210,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   todoText: { color: 'white', fontSize: 16, fontWeight: '500' },
+  completeText: {
+    color: theme.grey,
+    textDecorationLine: 'line-through',
+  },
 })
