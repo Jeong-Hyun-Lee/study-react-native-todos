@@ -136,7 +136,6 @@ export default function App() {
   }, [])
 
   const updateTodo = (key, toUpdate) => {
-    console.log('updateTodo', key, toUpdate)
     const newTodos = { ...todos }
     newTodos[key].text = toUpdate
     setTodos(newTodos)
@@ -190,13 +189,16 @@ export default function App() {
               />
             ) : (
               <View style={styles.todo} key={key}>
-                <TouchableOpacity onPress={() => toggleCompleteTodo(key)}>
-                  <Fontisto
-                    name={`checkbox-${
-                      todos[key].isComplete ? 'active' : 'passive'
-                    }`}
+                <TouchableOpacity
+                  style={{ marginRight: 20 }}
+                  onPress={() => toggleCompleteTodo(key)}
+                >
+                  <AntDesign
+                    name={
+                      todos[key].isComplete ? 'checkcircle' : 'checkcircleo'
+                    }
                     size={18}
-                    color='white'
+                    color={todos[key].isComplete ? 'white' : 'grey'}
                   />
                 </TouchableOpacity>
                 <Text
@@ -207,11 +209,14 @@ export default function App() {
                 >
                   {todos[key].text}
                 </Text>
-                <TouchableOpacity onPress={() => setUpdateTodoKey(key)}>
-                  <AntDesign name='form' size={24} color='white' />
+                <TouchableOpacity
+                  onPress={() => setUpdateTodoKey(key)}
+                  style={{ marginRight: 20 }}
+                >
+                  <AntDesign name='form' size={24} color='grey' />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => deleteTodo(key)}>
-                  <Fontisto name='trash' size={18} color={theme.grey} />
+                  <Fontisto name='trash' size={18} color='grey' />
                 </TouchableOpacity>
               </View>
             )
@@ -256,7 +261,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  todoText: { color: 'white', fontSize: 16, fontWeight: '500' },
+  todoText: { color: 'white', fontSize: 16, fontWeight: '500', flex: 2 },
   completeText: {
     color: theme.grey,
     textDecorationLine: 'line-through',
@@ -265,7 +270,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderRadius: 30,
+    borderRadius: 10,
     fontSize: 16,
     fontWeight: '500',
     flex: 1,
