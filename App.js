@@ -11,15 +11,43 @@ import {
 import { theme } from './colors'
 import { useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Fontisto } from '@expo/vector-icons'
+import { Fontisto, MaterialIcons, AntDesign } from '@expo/vector-icons'
 
 const STORAGE_KEY = '@todos'
 const IS_WORK = '@isWork'
+
+const UpdateTodo = ({ submitHandler, initText, todoKey, setUpdateTodoKey }) => {
+  const [text, setText] = useState(initText)
+
+  return (
+    <View
+      style={{
+        ...styles.todo,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+      }}
+    >
+      <TextInput
+        style={styles.updateInput}
+        onChangeText={setText}
+        onSubmitEditing={() => {
+          let updateText = text.trim() === '' ? initText : text
+          submitHandler(todoKey, updateText)
+        }}
+        value={text}
+      />
+      <TouchableOpacity onPress={() => setUpdateTodoKey('')}>
+        <MaterialIcons name='cancel' size={24} color={theme.grey} />
+      </TouchableOpacity>
+    </View>
+  )
+}
 
 export default function App() {
   const [working, setWorking] = useState(true)
   const [text, setText] = useState('')
   const [todos, setTodos] = useState({})
+  const [updateTodoKey, setUpdateTodoKey] = useState('')
 
   const travel = () => {
     setWorking(false)
@@ -94,7 +122,7 @@ export default function App() {
     ])
   }
 
-  const toggleCompleteTodos = (key) => {
+  const toggleCompleteTodo = (key) => {
     const newTodos = { ...todos }
     newTodos[key].isComplete = !newTodos[key].isComplete
     setTodos(newTodos)
@@ -104,7 +132,17 @@ export default function App() {
   useEffect(() => {
     loadTodos()
     loadIsWork()
+    return () => setUpdateTodoKey('')
   }, [])
+
+  const updateTodo = (key, toUpdate) => {
+    console.log('updateTodo', key, toUpdate)
+    const newTodos = { ...todos }
+    newTodos[key].text = toUpdate
+    setTodos(newTodos)
+    saveTodos(newTodos)
+    setUpdateTodoKey('')
+  }
 
   return (
     <View style={styles.container}>
@@ -117,12 +155,7 @@ export default function App() {
             Work
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={travel}
-          // onPressIn={(e) => console.log('onPressIn')}
-          // onLongPress={(e) => console.log('onLongPress')}
-          // onPressOut={(e) => console.log('onPressOut')}
-        >
+        <TouchableOpacity onPress={travel}>
           <Text
             style={{
               ...styles.btnText,
@@ -146,28 +179,43 @@ export default function App() {
       <ScrollView>
         {Object.keys(todos).map((key) =>
           todos[key].work === working ? (
-            <View style={styles.todo} key={key}>
-              <TouchableOpacity onPress={() => toggleCompleteTodos(key)}>
-                <Fontisto
-                  name={`checkbox-${
-                    todos[key].isComplete ? 'active' : 'passive'
-                  }`}
-                  size={18}
-                  color='white'
-                />
-              </TouchableOpacity>
-              <Text
-                style={{
-                  ...styles.todoText,
-                  ...(todos[key].isComplete ? styles.completeText : {}),
+            updateTodoKey === key ? (
+              <UpdateTodo
+                {...{
+                  submitHandler: updateTodo,
+                  initText: todos[key].text,
+                  key,
+                  todoKey: key,
+                  setUpdateTodoKey,
                 }}
-              >
-                {todos[key].text}
-              </Text>
-              <TouchableOpacity onPress={() => deleteTodo(key)}>
-                <Fontisto name='trash' size={18} color={theme.grey} />
-              </TouchableOpacity>
-            </View>
+              />
+            ) : (
+              <View style={styles.todo} key={key}>
+                <TouchableOpacity onPress={() => toggleCompleteTodo(key)}>
+                  <Fontisto
+                    name={`checkbox-${
+                      todos[key].isComplete ? 'active' : 'passive'
+                    }`}
+                    size={18}
+                    color='white'
+                  />
+                </TouchableOpacity>
+                <Text
+                  style={{
+                    ...styles.todoText,
+                    ...(todos[key].isComplete ? styles.completeText : {}),
+                  }}
+                >
+                  {todos[key].text}
+                </Text>
+                <TouchableOpacity onPress={() => setUpdateTodoKey(key)}>
+                  <AntDesign name='form' size={24} color='white' />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteTodo(key)}>
+                  <Fontisto name='trash' size={18} color={theme.grey} />
+                </TouchableOpacity>
+              </View>
+            )
           ) : null
         )}
       </ScrollView>
@@ -213,5 +261,15 @@ const styles = StyleSheet.create({
   completeText: {
     color: theme.grey,
     textDecorationLine: 'line-through',
+  },
+  updateInput: {
+    backgroundColor: 'white',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 30,
+    fontSize: 16,
+    fontWeight: '500',
+    flex: 1,
+    marginRight: 15,
   },
 })
