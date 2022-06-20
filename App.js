@@ -1,295 +1,111 @@
-import { StatusBar } from 'expo-status-bar'
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Alert,
-  Platform,
-} from 'react-native'
-import { theme } from './colors'
-import { useEffect, useState } from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Fontisto, MaterialIcons, AntDesign } from '@expo/vector-icons'
+import React, { useEffect, useState } from 'react'
+import { View, Text, Button, TextInput } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import TodoPage from './src/pages/TodoPage'
 
-const STORAGE_KEY = '@todos'
-const IS_WORK = '@isWork'
-
-const UpdateTodo = ({ submitHandler, initText, todoKey, setUpdateTodoKey }) => {
-  const [text, setText] = useState(initText)
-
-  return (
-    <View
-      style={{
-        ...styles.todo,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-      }}
-    >
-      <TextInput
-        style={styles.updateInput}
-        onChangeText={setText}
-        onSubmitEditing={() => {
-          let updateText = text.trim() === '' ? initText : text
-          submitHandler(todoKey, updateText)
-        }}
-        value={text}
-      />
-      <TouchableOpacity onPress={() => setUpdateTodoKey('')}>
-        <MaterialIcons name='cancel' size={24} color={theme.grey} />
-      </TouchableOpacity>
-    </View>
-  )
-}
-
-export default function App() {
-  const [working, setWorking] = useState(true)
-  const [text, setText] = useState('')
-  const [todos, setTodos] = useState({})
-  const [updateTodoKey, setUpdateTodoKey] = useState('')
-
-  const travel = () => {
-    setWorking(false)
-    saveIsWork(false)
-  }
-  const work = () => {
-    setWorking(true)
-    saveIsWork(true)
-  }
-  const onChangeText = (payload) => setText(payload)
-  const addToDo = async () => {
-    if (text === '') {
-      return
-    }
-    const newTodos = {
-      ...todos,
-      [Date.now()]: { text, work: working, isComplete: false },
-    }
-    // console.log(newTodos)
-    setTodos(newTodos)
-    await saveTodos(newTodos)
-    setText('')
-  }
-
-  const saveTodos = async (toSave) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-  const loadTodos = async () => {
-    try {
-      const str = await AsyncStorage.getItem(STORAGE_KEY)
-      if (str) {
-        setTodos(JSON.parse(str))
-      }
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-  const saveIsWork = async (toSave) => {
-    try {
-      await AsyncStorage.setItem(IS_WORK, JSON.stringify(toSave))
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-  const loadIsWork = async () => {
-    try {
-      const str = await AsyncStorage.getItem(IS_WORK)
-      setWorking(JSON.parse(str))
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-  const deleteTodo = (key) => {
-    if (Platform.OS === 'web') {
-      const ok = confirm('Do you want to delete this To Do?')
-      if (ok) {
-        const newTodos = { ...todos }
-        delete newTodos[key]
-
-        setTodos(newTodos)
-        saveTodos(newTodos)
-      }
-    } else {
-      Alert.alert('Delete To Do?', 'Are you sure?', [
-        { text: '아니오' },
-        {
-          text: '네',
-          onPress: () => {
-            const newTodos = { ...todos }
-            delete newTodos[key]
-
-            setTodos(newTodos)
-            saveTodos(newTodos)
-          },
-        },
-      ])
-    }
-  }
-
-  const toggleCompleteTodo = (key) => {
-    const newTodos = { ...todos }
-    newTodos[key].isComplete = !newTodos[key].isComplete
-    setTodos(newTodos)
-    saveTodos(newTodos)
-  }
+function HomeScreen({ navigation, route: { params } }) {
+  const { test } = params
 
   useEffect(() => {
-    loadTodos()
-    loadIsWork()
-    return () => setUpdateTodoKey('')
-  }, [])
-
-  const updateTodo = (key, toUpdate) => {
-    const newTodos = { ...todos }
-    newTodos[key].text = toUpdate
-    setTodos(newTodos)
-    saveTodos(newTodos)
-    setUpdateTodoKey('')
-  }
+    if (params?.post) {
+      console.log('post')
+    }
+  }, [params?.post])
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={work}>
-          <Text
-            style={{
-              fontSize: 38,
-              fontWeight: '600',
-              color: working ? 'white' : theme.grey,
-            }}
-          >
-            Work
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={travel}>
-          <Text
-            style={{
-              fontSize: 38,
-              fontWeight: '600',
-              color: !working ? 'white' : theme.grey,
-            }}
-          >
-            Travel
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View>
-        <TextInput
-          onSubmitEditing={addToDo}
-          style={styles.input}
-          placeholder={working ? 'Add a To Do' : 'Where do you want go?'}
-          onChangeText={onChangeText}
-          value={text}
-          returnKeyType='done'
-        />
-      </View>
-      <ScrollView>
-        {Object.keys(todos).map((key) =>
-          todos[key].work === working ? (
-            updateTodoKey === key ? (
-              <UpdateTodo
-                {...{
-                  submitHandler: updateTodo,
-                  initText: todos[key].text,
-                  key,
-                  todoKey: key,
-                  setUpdateTodoKey,
-                }}
-              />
-            ) : (
-              <View style={styles.todo} key={key}>
-                <TouchableOpacity
-                  style={{ marginRight: 20 }}
-                  onPress={() => toggleCompleteTodo(key)}
-                >
-                  <AntDesign
-                    name={
-                      todos[key].isComplete ? 'checkcircle' : 'checkcircleo'
-                    }
-                    size={18}
-                    color={todos[key].isComplete ? 'white' : 'grey'}
-                  />
-                </TouchableOpacity>
-                <Text
-                  style={{
-                    ...styles.todoText,
-                    ...(todos[key].isComplete ? styles.completeText : {}),
-                  }}
-                >
-                  {todos[key].text}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => setUpdateTodoKey(key)}
-                  style={{ marginRight: 20 }}
-                >
-                  <AntDesign name='form' size={24} color='grey' />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => deleteTodo(key)}>
-                  <Fontisto name='trash' size={18} color='grey' />
-                </TouchableOpacity>
-              </View>
-            )
-          ) : null
-        )}
-      </ScrollView>
-      <StatusBar style='light' />
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text>Home Screen</Text>
+      <Button title='Go to TO DO' onPress={() => navigation.navigate('Todo')} />
+      <Button
+        title='Go to Details'
+        onPress={() =>
+          navigation.navigate('Details', {
+            itemId: 86,
+            otherParam: 'anything you want here',
+          })
+        }
+      />
+      <Button
+        title='Create post'
+        onPress={() => navigation.navigate('CreatePost')}
+      />
+      <Text style={{ margin: 10 }}>Post: {params?.post}</Text>
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.bg,
-    paddingHorizontal: 20,
-  },
-  header: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    marginTop: 100,
-  },
-  input: {
-    backgroundColor: 'white',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 30,
-    marginVertical: 20,
-    fontSize: 18,
-  },
-  todo: {
-    backgroundColor: theme.todoBg,
-    marginBottom: 10,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    borderRadius: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  todoText: { color: 'white', fontSize: 16, fontWeight: '500', flex: 2 },
-  completeText: {
-    color: theme.grey,
-    textDecorationLine: 'line-through',
-  },
-  updateInput: {
-    backgroundColor: 'white',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    fontSize: 16,
-    fontWeight: '500',
-    flex: 1,
-    marginRight: 15,
-  },
-})
+function CreatePostScreen({ navigation, route }) {
+  const [postText, setPostText] = useState('')
+
+  return (
+    <>
+      <TextInput
+        multiline
+        placeholder="What's on your mind?"
+        style={{ height: 200, padding: 10, backgroundColor: 'white' }}
+        value={postText}
+        onChangeText={setPostText}
+      />
+      <Button
+        title='Done'
+        onPress={() => {
+          // Pass and merge params back to home screen
+          navigation.navigate({
+            name: 'Home',
+            params: { post: postText },
+            merge: true,
+          })
+        }}
+      />
+    </>
+  )
+}
+
+function DetailsScreen({ navigation, route }) {
+  const { itemId, otherParam } = route.params
+  console.log('otherParam', typeof otherParam, otherParam)
+  console.log('itemId', typeof itemId, itemId)
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text>Details Screen</Text>
+      <Text>itemId: {JSON.stringify(itemId)}</Text>
+      <Text>otherParam: {JSON.stringify(otherParam)}</Text>
+      <Button
+        title='Go to Details... again'
+        onPress={() =>
+          navigation.push('Details', {
+            itemId: Math.floor(Math.random() * 100),
+          })
+        }
+      />
+      <Button title='Go to Home' onPress={() => navigation.navigate('Home')} />
+      <Button title='Go back' onPress={() => navigation.goBack()} />
+      <Button
+        title='Go back to first screen in stack'
+        onPress={() => navigation.popToTop()}
+      />
+    </View>
+  )
+}
+
+const Stack = createNativeStackNavigator()
+
+function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName='Home'>
+        <Stack.Screen
+          name='Home'
+          component={HomeScreen}
+          initialParams={{ test: 14 }}
+        />
+        <Stack.Screen name='Details' component={DetailsScreen} />
+        <Stack.Screen name='Todo' component={TodoPage} />
+        <Stack.Screen name='CreatePost' component={CreatePostScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  )
+}
+
+export default App
