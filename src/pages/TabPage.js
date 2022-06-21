@@ -7,7 +7,6 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native'
-import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import TodoPage from './TodoPage'
@@ -85,31 +84,29 @@ function CreatePostScreen({ navigation, route }) {
 
 const TabPage = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName='Home'>
-        <Stack.Screen
-          name='Home'
-          component={HomeScreen}
-          initialParams={{ test: 14 }}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name='CreatePost'
-          component={CreatePostScreen}
-          options={{
-            headerRight: () => (
-              <Button
-                onPress={() => alert('This is a button!')}
-                title='Info'
-                color='#000'
-              />
-            ),
-          }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator initialRouteName='Home'>
+      <Stack.Screen
+        name='Home'
+        component={HomeScreen}
+        initialParams={{ test: 14 }}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name='CreatePost'
+        component={CreatePostScreen}
+        options={{
+          headerRight: () => (
+            <Button
+              onPress={() => alert('This is a button!')}
+              title='Info'
+              color='#000'
+            />
+          ),
+        }}
+      />
+    </Stack.Navigator>
   )
 }
 export default React.memo(TabPage)
