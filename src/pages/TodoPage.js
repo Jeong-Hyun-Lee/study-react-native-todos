@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native'
 import { theme } from '../../colors'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Fontisto, MaterialIcons, AntDesign } from '@expo/vector-icons'
 import { NavigationContainer } from '@react-navigation/native'
@@ -45,7 +45,7 @@ const UpdateTodo = ({ submitHandler, initText, todoKey, setUpdateTodoKey }) => {
   )
 }
 
-export default function TodoPage() {
+const TodoPage = () => {
   const [working, setWorking] = useState(true)
   const [text, setText] = useState('')
   const [todos, setTodos] = useState({})
@@ -246,6 +246,8 @@ export default function TodoPage() {
     </View>
   )
 }
+
+export default React.memo(TodoPage)
 
 const styles = StyleSheet.create({
   container: {
