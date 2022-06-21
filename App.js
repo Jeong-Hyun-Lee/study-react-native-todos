@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, Button, TextInput } from 'react-native'
+import { View, Text, Button, TextInput, Image } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import TodoPage from './src/pages/TodoPage'
@@ -64,8 +64,7 @@ function CreatePostScreen({ navigation, route }) {
 
 function DetailsScreen({ navigation, route }) {
   const { itemId, otherParam } = route.params
-  console.log('otherParam', typeof otherParam, otherParam)
-  console.log('itemId', typeof itemId, itemId)
+
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>Details Screen</Text>
@@ -85,7 +84,21 @@ function DetailsScreen({ navigation, route }) {
         title='Go back to first screen in stack'
         onPress={() => navigation.popToTop()}
       />
+
+      <Button
+        title='Update the title'
+        onPress={() => navigation.setOptions({ title: '핫데랏' })}
+      />
     </View>
+  )
+}
+
+function LogoTitle() {
+  return (
+    <Image
+      style={{ width: 50, height: 50 }}
+      source={require('./assets/icon.png')}
+    />
   )
 }
 
@@ -99,10 +112,37 @@ function App() {
           name='Home'
           component={HomeScreen}
           initialParams={{ test: 14 }}
+          options={{
+            title: 'My home',
+            headerStyle: {
+              backgroundColor: '#f4511e',
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+          }}
         />
-        <Stack.Screen name='Details' component={DetailsScreen} />
+        <Stack.Screen
+          name='Details'
+          component={DetailsScreen}
+          options={({ route }) => ({ title: route.params.name })}
+        />
         <Stack.Screen name='Todo' component={TodoPage} />
-        <Stack.Screen name='CreatePost' component={CreatePostScreen} />
+        <Stack.Screen
+          name='CreatePost'
+          component={CreatePostScreen}
+          options={{
+            headerTitle: (props) => <LogoTitle {...props} />,
+            headerRight: () => (
+              <Button
+                onPress={() => alert('This is a button!')}
+                title='Info'
+                color='#000'
+              />
+            ),
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   )
