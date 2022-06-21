@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, Button, TextInput, Image } from 'react-native'
+import {
+  View,
+  Text,
+  Button,
+  TextInput,
+  Image,
+  TouchableOpacity,
+} from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import TodoPage from './src/pages/TodoPage'
+import { MaterialIcons } from '@expo/vector-icons'
+
+const Tab = createBottomTabNavigator()
 
 function HomeScreen({ navigation, route: { params } }) {
   const { test } = params
@@ -14,24 +25,40 @@ function HomeScreen({ navigation, route: { params } }) {
   }, [params?.post])
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Home Screen</Text>
-      <Button title='Go to TO DO' onPress={() => navigation.navigate('Todo')} />
-      <Button
-        title='Go to Details'
-        onPress={() =>
-          navigation.navigate('Details', {
-            itemId: 86,
-            otherParam: 'anything you want here',
-          })
-        }
+    <Tab.Navigator>
+      <Tab.Screen
+        name='Details'
+        component={DetailsScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name='home' size={size} color={color} />
+          ),
+          headerStyle: {
+            backgroundColor: '#f4511e',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
-      <Button
-        title='Create post'
-        onPress={() => navigation.navigate('CreatePost')}
+      <Tab.Screen
+        name='Todo'
+        component={TodoPage}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name='work' size={size} color={color} />
+          ),
+          headerStyle: {
+            backgroundColor: '#f4511e',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
-      <Text style={{ margin: 10 }}>Post: {params?.post}</Text>
-    </View>
+    </Tab.Navigator>
   )
 }
 
@@ -62,33 +89,16 @@ function CreatePostScreen({ navigation, route }) {
   )
 }
 
-function DetailsScreen({ navigation, route }) {
-  const { itemId, otherParam } = route.params
-
+function DetailsScreen({ navigation }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>Details Screen</Text>
-      <Text>itemId: {JSON.stringify(itemId)}</Text>
-      <Text>otherParam: {JSON.stringify(otherParam)}</Text>
-      <Button
-        title='Go to Details... again'
-        onPress={() =>
-          navigation.push('Details', {
-            itemId: Math.floor(Math.random() * 100),
-          })
-        }
-      />
-      <Button title='Go to Home' onPress={() => navigation.navigate('Home')} />
-      <Button title='Go back' onPress={() => navigation.goBack()} />
-      <Button
-        title='Go back to first screen in stack'
-        onPress={() => navigation.popToTop()}
-      />
-
-      <Button
-        title='Update the title'
-        onPress={() => navigation.setOptions({ title: '핫데랏' })}
-      />
+      <TouchableOpacity>
+        <Button
+          title='Create post'
+          onPress={() => navigation.navigate('CreatePost')}
+        />
+      </TouchableOpacity>
     </View>
   )
 }
@@ -113,22 +123,9 @@ function App() {
           component={HomeScreen}
           initialParams={{ test: 14 }}
           options={{
-            title: 'My home',
-            headerStyle: {
-              backgroundColor: '#f4511e',
-            },
-            headerTintColor: '#fff',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
+            headerShown: false,
           }}
         />
-        <Stack.Screen
-          name='Details'
-          component={DetailsScreen}
-          options={({ route }) => ({ title: route.params.name })}
-        />
-        <Stack.Screen name='Todo' component={TodoPage} />
         <Stack.Screen
           name='CreatePost'
           component={CreatePostScreen}
