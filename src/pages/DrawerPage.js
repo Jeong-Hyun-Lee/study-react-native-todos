@@ -8,19 +8,19 @@ const Drawer = createDrawerNavigator()
 
 const DrawerNavigator = () => {
   return (
-    <Drawer.Navigator>
-      <Drawer.Screen name='Details' component={DetailPage} />
-      <Drawer.Screen name='Todo' component={TodoPage} />
-    </Drawer.Navigator>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>하이!!</Text>
+    </View>
   )
 }
 
 const DrawerPage = () => {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>하이!!</Text>
+    <Drawer.Navigator>
+      <Drawer.Screen name='Details' component={DetailPage} />
+      <Drawer.Screen name='Todo' component={TodoPage} />
       <DrawerNavigator />
-    </View>
+    </Drawer.Navigator>
   )
 }
 

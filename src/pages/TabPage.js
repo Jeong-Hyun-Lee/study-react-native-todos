@@ -12,6 +12,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import TodoPage from './TodoPage'
 import { MaterialIcons } from '@expo/vector-icons'
 import DetailPage from './DetailPage'
+import CreatePostPage from './CreatePostPage'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -55,33 +56,6 @@ function HomeScreen({ navigation, route: { params } }) {
   )
 }
 
-function CreatePostScreen({ navigation, route }) {
-  const [postText, setPostText] = useState('')
-
-  return (
-    <>
-      <TextInput
-        multiline
-        placeholder="What's on your mind?"
-        style={{ height: 200, padding: 10, backgroundColor: 'white' }}
-        value={postText}
-        onChangeText={setPostText}
-      />
-      <Button
-        title='Done'
-        onPress={() => {
-          // Pass and merge params back to home screen
-          navigation.navigate({
-            name: 'Home',
-            params: { post: postText },
-            merge: true,
-          })
-        }}
-      />
-    </>
-  )
-}
-
 const TabPage = () => {
   return (
     <Stack.Navigator initialRouteName='Home'>
@@ -95,7 +69,7 @@ const TabPage = () => {
       />
       <Stack.Screen
         name='CreatePost'
-        component={CreatePostScreen}
+        component={CreatePostPage}
         options={{
           headerRight: () => (
             <Button

@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import DetailPage from './DetailPage'
 import TodoPage from './TodoPage'
 import { Text, TextInput, Button } from 'react-native'
+import CreatePostScreen from './CreatePostPage'
 
 const Tab = createMaterialTopTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -14,33 +15,6 @@ const HomeScreen = () => {
       <Tab.Screen name='Details' component={DetailPage} />
       <Tab.Screen name='Todo' component={TodoPage} />
     </Tab.Navigator>
-  )
-}
-
-function CreatePostScreen({ navigation, route }) {
-  const [postText, setPostText] = useState('')
-
-  return (
-    <>
-      <TextInput
-        multiline
-        placeholder="What's on your mind?"
-        style={{ height: 200, padding: 10, backgroundColor: 'white' }}
-        value={postText}
-        onChangeText={setPostText}
-      />
-      <Button
-        title='Done'
-        onPress={() => {
-          // Pass and merge params back to home screen
-          navigation.navigate({
-            name: 'Home',
-            params: { post: postText },
-            merge: true,
-          })
-        }}
-      />
-    </>
   )
 }
 
