@@ -6,8 +6,13 @@ import TabPage from './src/pages/TabPage'
 // import DrawerPage from './src/pages/DrawerPage'
 import ToptabPage from './src/pages/ToptabPage'
 import { RecoilRoot } from 'recoil'
+import { Appearance, useColorScheme } from 'react-native'
+import { useEffect } from 'react'
 
 function App() {
+  const osTheme = useColorScheme()
+  useEffect(() => console.log('useColorScheme', osTheme), [osTheme])
+
   return (
     <RecoilRoot>
       <SafeAreaProvider>
